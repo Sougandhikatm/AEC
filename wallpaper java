@@ -1,0 +1,97 @@
+package com.example.wallpaper1;
+
+import android.Manifest;
+import android.app.WallpaperManager;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class MainActivity extends AppCompatActivity {
+
+    private Button changeWallpaperButton;
+    private WallpaperManager wallpaperManager;
+    private int nextImg = 1;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        changeWallpaperButton = findViewById(R.id.changeWallpaperButton);
+        wallpaperManager = WallpaperManager.getInstance(this);
+
+        changeWallpaperButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.SET_WALLPAPER)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.SET_WALLPAPER},
+                            1);
+                } else {
+                    startChangingWallpaper();
+                }
+            }
+        });
+    }
+
+    private void startChangingWallpaper() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Drawable drawable;
+
+                switch (nextImg) {
+                    case 1:
+                        drawable = getResources().getDrawable(R.drawable.img1);
+                        nextImg = 2;
+                        break;
+                    case 2:
+                        drawable = getResources().getDrawable(R.drawable.img2);
+                        nextImg = 3;
+                        break;
+                    case 3:
+                        drawable = getResources().getDrawable(R.drawable.img3);
+                        nextImg = 4;
+                        break;
+                    case 4:
+                        drawable = getResources().getDrawable(R.drawable.img4);
+                        nextImg = 5;
+                        break;
+                    case 5:
+                        drawable = getResources().getDrawable(R.drawable.img5);
+                        nextImg = 6;
+                        break;
+                    default:
+                        drawable = getResources().getDrawable(R.drawable.img6);
+                        nextImg = 1;
+                        break;
+                }
+
+                Bitmap imgBmp = ((BitmapDrawable) drawable).getBitmap();
+
+                try {
+                    wallpaperManager.setBitmap(imgBmp);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(MainActivity.this, "Failed to set wallpaper", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, 0, 30000); // Start immediately and repeat every 30 seconds
+    }
+}
